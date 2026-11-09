@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { setSessionUser } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { clearSessionUser, setSessionUser } from "@/lib/session";
 
 export type SessionUser = {
     id: string;
@@ -49,4 +50,9 @@ export async function loginWithLine(
     };
     await setSessionUser(sessionUser);
     return sessionUser;
+}
+
+export async function logout() {
+    await clearSessionUser();
+    redirect("/");
 }

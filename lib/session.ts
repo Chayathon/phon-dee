@@ -25,3 +25,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
         return null;
     }
 }
+
+export async function clearSessionUser() {
+    (await cookies()).delete(COOKIE);
+}

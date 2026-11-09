@@ -61,5 +61,5 @@ export function LiffLogin() {
         );
     }
 
-    return <Spinner />;
+    return <Spinner className="size-8" />;
 }
