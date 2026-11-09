@@ -28,7 +28,7 @@ export function LogoutButton() {
             ) : (
                 <LogOut data-icon="inline-start" />
             )}
-            Logout
+            ออกจากระบบ
         </Button>
     );
 }

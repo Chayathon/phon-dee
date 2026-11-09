@@ -3,8 +3,8 @@ import { LogoutButton } from "./logout-button";
 
 export function SiteHeader() {
     return (
-        <header className="fixed top-0 right-0 left-0 z-50 flex h-12 items-center gap-2 border-b bg-background/80 px-2 backdrop-blur transition-[left] duration-200 ease-linear md:left-(--sidebar-width) peer-data-[state=collapsed]:md:left-(--sidebar-width-icon)">
-            <SidebarTrigger />
+        <header className="fixed top-0 right-0 left-0 z-50 flex h-12 items-center gap-2 border-b bg-background/80 px-2 backdrop-blur transition-[left] duration-200 ease-linear lg:left-(--sidebar-width) peer-data-[state=collapsed]:lg:left-(--sidebar-width-icon)">
+            <SidebarTrigger className="max-lg:hidden" />
             <div className="ml-auto">
                 <LogoutButton />
             </div>
