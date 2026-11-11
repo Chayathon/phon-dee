@@ -8,9 +8,7 @@ export default function ManageLayout({ children }: LayoutProps<"/manage">) {
         <SidebarProvider>
             <ManageSidebar />
             <SiteHeader />
-            <main className="min-w-0 flex-1 pt-14 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
-                {children}
-            </main>
+            <main className="min-w-0 flex-1 pt-12">{children}</main>
             <BottomAppBar variant="manage" />
         </SidebarProvider>
     );
