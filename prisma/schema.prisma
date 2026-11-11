@@ -23,8 +23,12 @@ model User {
 model Loan {
   id           String   @id @default(cuid())
   name         String
-  available    Float
+  imageUrl     String?
+  minAmount    Float
+  maxAmount    Float
+  frequency    String   @default("MONTHLY")
   installments Int[]
+  active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 }
 
