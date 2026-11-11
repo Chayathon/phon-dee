@@ -19,9 +19,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
     FREQUENCIES,
     FREQUENCY_LABELS,
+    INTEREST_METHODS,
+    INTEREST_METHOD_LABELS,
 } from "@/app/(main)/manage/loans/lib/loan.constants";
 import type {
     Frequency,
+    InterestMethod,
     LoanFields,
     LoanItem,
 } from "@/app/actions/loans/loan.types";
@@ -61,6 +64,9 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
     const [frequency, setFrequency] = useState<Frequency>(
         loan?.frequency ?? "MONTHLY",
     );
+    const [interestMethod, setInterestMethod] = useState<InterestMethod>(
+        loan?.interestMethod ?? "EFFECTIVE",
+    );
     const [installments, setInstallments] = useState<number[]>(
         loan?.installments ?? [],
     );
@@ -80,6 +86,7 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         formData.set("frequency", frequency);
+        formData.set("interestMethod", interestMethod);
         installments.forEach((n) => formData.append("installments", String(n)));
         const parsed = parseLoanForm(formData);
 
@@ -218,6 +225,44 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                             </ToggleGroupItem>
                         ))}
                     </ToggleGroup>
+                </div>
+
+                <div className="grid gap-2">
+                    <Label>วิธีคิดดอกเบี้ย</Label>
+                    <ToggleGroup
+                        variant="outline"
+                        value={[interestMethod]}
+                        onValueChange={(v) =>
+                            v[0] && setInterestMethod(v[0] as InterestMethod)
+                        }
+                    >
+                        {INTEREST_METHODS.map((m) => (
+                            <ToggleGroupItem key={m} value={m}>
+                                {INTEREST_METHOD_LABELS[m]}
+                            </ToggleGroupItem>
+                        ))}
+                    </ToggleGroup>
+                    <FieldError errors={errors.interestMethod} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="loan-rate">อัตราดอกเบี้ย (ต่อปี)</Label>
+                    <InputGroup>
+                        <InputGroupInput
+                            id="loan-rate"
+                            name="interestRate"
+                            placeholder="15"
+                            type="number"
+                            inputMode="decimal"
+                            min={0}
+                            max={100}
+                            step="any"
+                            defaultValue={loan?.interestRate ?? 0}
+                            aria-invalid={!!errors.interestRate}
+                        />
+                        <InputGroupAddon>%</InputGroupAddon>
+                    </InputGroup>
+                    <FieldError errors={errors.interestRate} />
                 </div>
 
                 <div className="grid gap-2">

@@ -3,7 +3,10 @@
 import { useOptimistic, useTransition } from "react";
 import Image from "next/image";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
-import { FREQUENCY_LABELS } from "@/app/(main)/manage/loans/lib/loan.constants";
+import {
+    FREQUENCY_LABELS,
+    INTEREST_METHOD_LABELS,
+} from "@/app/(main)/manage/loans/lib/loan.constants";
 import { setLoanActive } from "@/app/actions/loans/loans";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,8 +89,14 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                     <Badge>{FREQUENCY_LABELS[loan.frequency]}</Badge>
+                    <Badge variant="secondary">
+                        {INTEREST_METHOD_LABELS[loan.interestMethod]} ·{" "}
+                        {loan.interestRate}% ต่อปี
+                    </Badge>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
                     {loan.installments.map((n) => (
-                        <Badge key={n} variant="secondary">
+                        <Badge key={n} variant="outline">
                             {n} งวด
                         </Badge>
                     ))}

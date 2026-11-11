@@ -9,6 +9,8 @@ export function parseLoanForm(formData: FormData): ParseResult {
         minAmount: formData.get("minAmount"),
         maxAmount: formData.get("maxAmount"),
         frequency: formData.get("frequency"),
+        interestMethod: formData.get("interestMethod"),
+        interestRate: formData.get("interestRate"),
         installments: formData.getAll("installments"),
         image: formData.get("image"),
     });

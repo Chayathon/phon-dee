@@ -9,7 +9,11 @@ import {
     uploadLoanImage,
 } from "@/app/(main)/manage/loans/lib/loan-image";
 import { parseLoanForm } from "@/app/actions/loans/loan.parsers";
-import type { Frequency, LoanItem } from "@/app/actions/loans/loan.types";
+import type {
+    Frequency,
+    InterestMethod,
+    LoanItem,
+} from "@/app/actions/loans/loan.types";
 
 export async function listLoans(): Promise<LoanItem[]> {
     if (!(await isAdmin())) return [];
@@ -25,6 +29,8 @@ export async function listLoans(): Promise<LoanItem[]> {
         minAmount: l.minAmount,
         maxAmount: l.maxAmount,
         frequency: l.frequency as Frequency,
+        interestMethod: l.interestMethod as InterestMethod,
+        interestRate: l.interestRate,
         installments: l.installments,
         active: l.active,
     }));
