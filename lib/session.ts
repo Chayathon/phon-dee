@@ -1,9 +1,12 @@
 import "server-only";
 import { cookies } from "next/headers";
 import type { SessionUser } from "@/app/actions/auth";
-import { SESSION_MAX_AGE, signSession, verifySession } from "@/lib/jwt";
-
-export const SESSION_COOKIE = "phondee_session";
+import {
+    SESSION_COOKIE,
+    SESSION_MAX_AGE,
+    signSession,
+    verifySession,
+} from "@/lib/jwt";
 
 export async function setSessionUser(user: SessionUser) {
     const store = await cookies();

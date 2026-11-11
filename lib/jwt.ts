@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import type { SessionUser } from "@/app/actions/auth";
 
+export const SESSION_COOKIE = "phondee_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 
 function getKey() {
