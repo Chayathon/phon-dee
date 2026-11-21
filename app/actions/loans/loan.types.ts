@@ -1,10 +1,7 @@
 import type { z } from "zod";
 
 import type { loanSchema } from "@/app/(main)/manage/loans/lib/loan.schemas";
-import type {
-    FREQUENCIES,
-    INTEREST_METHODS,
-} from "@/lib/constants/loan";
+import type { FREQUENCIES, INTEREST_METHODS } from "@/lib/constants/loan";
 
 export type Frequency = (typeof FREQUENCIES)[number];
 

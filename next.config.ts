@@ -10,12 +10,9 @@ const nextConfig: NextConfig = {
         },
     },
     images: {
-        remotePatterns: [
-            new URL("https://profile.line-scdn.net/**"),
-            ...(process.env.AWS_ENDPOINT_URL_S3
-                ? [new URL(`${process.env.AWS_ENDPOINT_URL_S3}/**`)]
-                : []),
-        ],
+        remotePatterns: [new URL("https://profile.line-scdn.net/**")],
+        // Uploaded files are served from the private bucket via app/api/files/**/route.ts
+        localPatterns: [{ pathname: "/api/files/**", search: "" }],
     },
     cacheComponents: true,
     partialPrefetching: true,

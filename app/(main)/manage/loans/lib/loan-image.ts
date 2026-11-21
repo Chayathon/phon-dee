@@ -1,9 +1,15 @@
 import "server-only";
-import { deleteFile, uploadFile } from "@/lib/upload-file";
+import { deleteFile, getFile, uploadFile } from "@/lib/file";
+
+const LOAN_IMAGE_PREFIX = "loans/";
+
+export function getLoanImage(name: string) {
+    return getFile(`${LOAN_IMAGE_PREFIX}${name}`);
+}
 
 export const uploadLoanImage = (file: File) =>
     uploadFile(file, {
-        prefix: "loans/",
+        prefix: LOAN_IMAGE_PREFIX,
         extensions: {
             "image/jpeg": "jpg",
             "image/png": "png",

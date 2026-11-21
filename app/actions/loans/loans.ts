@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { isAdmin } from "@/lib/guard";
+import { toFileUrl } from "@/lib/file";
 import { FORBIDDEN, fail, type ActionResult } from "@/lib/action";
 import {
     deleteLoanImage,
@@ -25,7 +26,7 @@ export async function listLoans(): Promise<LoanItem[]> {
     return loans.map((l) => ({
         id: l.id,
         name: l.name,
-        imageUrl: l.imageUrl,
+        imageUrl: l.imageUrl && toFileUrl(l.imageUrl),
         minAmount: l.minAmount,
         maxAmount: l.maxAmount,
         frequency: l.frequency as Frequency,
