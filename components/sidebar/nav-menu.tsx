@@ -1,4 +1,11 @@
-import { Banknote, Plus, ReceiptText, Settings, Users } from "lucide-react";
+import {
+    Banknote,
+    Landmark,
+    Plus,
+    ReceiptText,
+    Settings,
+    Users,
+} from "lucide-react";
 
 export const managementMenu = [
     {
@@ -8,8 +15,8 @@ export const managementMenu = [
     },
     {
         title: "สินเชื่อ",
-        url: "#",
-        icon: Banknote,
+        url: "/manage/loans",
+        icon: Landmark,
     },
     {
         title: "ตั้งค่า",
