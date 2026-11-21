@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { FREQUENCIES, INTEREST_METHODS } from "./loan.constants";
+import { FREQUENCIES, INTEREST_METHODS } from "@/lib/constants/loan";
 
 export const loanSchema = z
     .object({

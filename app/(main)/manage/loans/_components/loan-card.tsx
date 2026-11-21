@@ -6,7 +6,8 @@ import type { LoanItem } from "@/app/actions/loans/loan.types";
 import {
     FREQUENCY_LABELS,
     INTEREST_METHOD_LABELS,
-} from "@/app/(main)/manage/loans/lib/loan.constants";
+} from "@/lib/constants/loan";
+import { baht } from "@/lib/format";
 import { setLoanActive } from "@/app/actions/loans/loans";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,6 @@ type LoanCardProps = {
     onEdit: (loan: LoanItem) => void;
     onDelete: (loan: LoanItem) => void;
 };
-
-const baht = (n: number) => `฿${n.toLocaleString()}`;
 
 export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
     const [active, setActive] = useOptimistic(loan.active);

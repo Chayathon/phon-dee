@@ -4,7 +4,7 @@ import type { loanSchema } from "@/app/(main)/manage/loans/lib/loan.schemas";
 import type {
     FREQUENCIES,
     INTEREST_METHODS,
-} from "@/app/(main)/manage/loans/lib/loan.constants";
+} from "@/lib/constants/loan";
 
 export type Frequency = (typeof FREQUENCIES)[number];
 

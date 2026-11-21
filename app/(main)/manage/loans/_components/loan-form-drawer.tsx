@@ -21,7 +21,7 @@ import {
     FREQUENCY_LABELS,
     INTEREST_METHODS,
     INTEREST_METHOD_LABELS,
-} from "@/app/(main)/manage/loans/lib/loan.constants";
+} from "@/lib/constants/loan";
 import type {
     Frequency,
     InterestMethod,
