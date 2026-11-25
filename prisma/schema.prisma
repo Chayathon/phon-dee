@@ -24,17 +24,18 @@ model User {
 }
 
 model Loan {
-  id             String   @id @default(cuid())
-  name           String
-  imageUrl       String?
-  minAmount      Float
-  maxAmount      Float
-  frequency      String   @default("MONTHLY")
-  interestMethod String   @default("EFFECTIVE")
-  interestRate   Float    @default(0)
-  installments   Int[]
-  active         Boolean  @default(true)
-  createdAt      DateTime @default(now())
+  id              String   @id @default(cuid())
+  name            String
+  imageUrl        String?
+  minAmount       Float
+  maxAmount       Float
+  availableAmount Float    @default(0)
+  frequency       String   @default("MONTHLY")
+  interestMethod  String   @default("EFFECTIVE")
+  interestRate    Float    @default(0)
+  installments    Int[]
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
 
   debts            Debt[]
   loanApplications LoanApplication[]
