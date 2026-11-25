@@ -18,6 +18,9 @@ model User {
   picture   String?
   role      String   @default("USER")
   createdAt DateTime @default(now())
+
+  debts            Debt[]
+  loanApplications LoanApplication[]
 }
 
 model Loan {
@@ -32,24 +35,40 @@ model Loan {
   installments   Int[]
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
+
+  debts            Debt[]
+  loanApplications LoanApplication[]
 }
 
 model Debt {
-  id           String   @id @default(cuid())
-  userId       String
-  loanId       String
-  amount       Float
-  installments Int
-  createdAt    DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String
+  loanId        String
+  applicationId String?  @unique
+  amount        Float
+  installments  Int
+  createdAt     DateTime @default(now())
+
+  user             User             @relation(fields: [userId], references: [id])
+  loan             Loan             @relation(fields: [loanId], references: [id])
+  application      LoanApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  installmentItems Installment[]
+
+  @@index([userId])
+  @@index([loanId])
 }
 
 model Installment {
   id        String   @id @default(cuid())
   debtId    String
   amount    Float
-  dueDate   DateTime
+  dueDate   DateTime @db.Date
   paid      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  debt Debt @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@index([debtId])
 }
 
 model LoanApplication {
@@ -60,6 +79,13 @@ model LoanApplication {
   installments Int
   status       String   @default("PENDING")
   createdAt    DateTime @default(now())
+
+  user User  @relation(fields: [userId], references: [id])
+  loan Loan  @relation(fields: [loanId], references: [id])
+  debt Debt?
+
+  @@index([userId])
+  @@index([loanId])
 }
 
 model Setting {
