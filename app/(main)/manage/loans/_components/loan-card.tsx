@@ -3,10 +3,7 @@
 import { useOptimistic, useTransition } from "react";
 import Image from "next/image";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
-import {
-    FREQUENCY_LABELS,
-    INTEREST_METHOD_LABELS,
-} from "@/lib/constants/loan";
+import { FREQUENCY_LABELS, INTEREST_METHOD_LABELS } from "@/lib/constants/loan";
 import { baht } from "@/lib/format";
 import { setLoanActive } from "@/app/actions/loans/loans";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +75,12 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
                         </h3>
                         <p className="text-sm text-muted-foreground">
                             {baht(loan.minAmount)} – {baht(loan.maxAmount)}
+                        </p>
+                        <p className="my-4 text-lg font-semibold text-muted-foreground">
+                            คงเหลือ{" "}
+                            <span className="text-xl font-bold text-foreground">
+                                {baht(loan.availableAmount)}
+                            </span>
                         </p>
                     </div>
                     <Switch

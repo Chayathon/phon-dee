@@ -13,6 +13,7 @@ export type LoanItem = {
     imageUrl: string | null;
     minAmount: number;
     maxAmount: number;
+    availableAmount: number;
     frequency: Frequency;
     interestMethod: InterestMethod;
     interestRate: number;

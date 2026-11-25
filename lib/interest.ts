@@ -2,26 +2,18 @@ import type { Frequency, InterestMethod } from "@/app/actions/loans/loan.types";
 import { PERIODS_PER_YEAR } from "@/lib/constants/loan";
 
 export type InstallmentInput = {
-    /** Amount borrowed. */
     principal: number;
-    /** Nominal annual rate in percent, as stored on `Loan.interestRate` (15 = 15%). */
     annualRate: number;
-    /** Number of installments. */
     installments: number;
     frequency: Frequency;
     method: InterestMethod;
-    /** Raise each installment to the next 10 baht. Defaults to `true`. */
     roundUp?: boolean;
 };
 
 export type InstallmentResult = {
-    /** Amount due each period (rounded up to 10 when `roundUp`). */
     payment: number;
-    /** Payment before rounding up, to 2 decimals. */
     rawPayment: number;
-    /** `payment × installments`. */
     totalPayment: number;
-    /** `totalPayment − principal`. */
     totalInterest: number;
 };
 
@@ -99,4 +91,24 @@ export function calculateInstallment({
         totalPayment,
         totalInterest: roundMoney(totalPayment - principal),
     };
+}
+
+/**
+ * Split the principal equally across installments; the last one takes the
+ * rounding remainder so the total is exact.
+ */
+export function principalSchedule(
+    principal: number,
+    installments: number,
+): number[] {
+    if (!(principal > 0) || !Number.isInteger(installments) || installments < 1)
+        return [];
+
+    const share = roundMoney(principal / installments);
+    const shares = Array<number>(installments).fill(share);
+    shares[installments - 1] = roundMoney(
+        principal - share * (installments - 1),
+    );
+
+    return shares;
 }

@@ -5,6 +5,9 @@ import prisma from "@/lib/prisma";
 import { isAdmin } from "@/lib/guard";
 import { toFileUrl } from "@/lib/file";
 import { FORBIDDEN, fail, type ActionResult } from "@/lib/action";
+import { baht } from "@/lib/format";
+import { roundMoney } from "@/lib/interest";
+import { adjustLoanBalance } from "@/lib/loan-balance";
 import {
     deleteLoanImage,
     uploadLoanImage,
@@ -29,6 +32,7 @@ export async function listLoans(): Promise<LoanItem[]> {
         imageUrl: l.imageUrl && toFileUrl(l.imageUrl),
         minAmount: l.minAmount,
         maxAmount: l.maxAmount,
+        availableAmount: l.availableAmount,
         frequency: l.frequency as Frequency,
         interestMethod: l.interestMethod as InterestMethod,
         interestRate: l.interestRate,
@@ -47,7 +51,9 @@ export async function createLoan(formData: FormData): Promise<ActionResult> {
 
     try {
         const imageUrl = image ? await uploadLoanImage(image) : null;
-        await prisma.loan.create({ data: { ...fields, imageUrl } });
+        await prisma.loan.create({
+            data: { ...fields, imageUrl, availableAmount: fields.maxAmount },
+        });
 
         revalidatePath("/manage/loans");
         return { ok: true };
@@ -70,14 +76,28 @@ export async function updateLoan(
         const existing = await prisma.loan.findUnique({ where: { id } });
         if (!existing) return { ok: false, error: "Loan not found" };
 
-        const imageUrl = image
-            ? await uploadLoanImage(image)
-            : existing.imageUrl;
+        const uploaded = image ? await uploadLoanImage(image) : null;
+        const imageUrl = uploaded ?? existing.imageUrl;
 
-        await prisma.loan.update({
-            where: { id },
-            data: { ...fields, imageUrl },
-        });
+        try {
+            await prisma.$transaction(async (tx) => {
+                await adjustLoanBalance(
+                    tx,
+                    id,
+                    fields.maxAmount - existing.maxAmount,
+                    (available) =>
+                        `จำนวนเงินสูงสุดต้องไม่น้อยกว่ายอดที่ถูกเบิกไปแล้ว (${baht(roundMoney(existing.maxAmount - available))})`,
+                );
+
+                await tx.loan.update({
+                    where: { id },
+                    data: { ...fields, imageUrl },
+                });
+            });
+        } catch (e) {
+            if (uploaded) await deleteLoanImage(uploaded);
+            throw e;
+        }
 
         if (image && existing.imageUrl)
             await deleteLoanImage(existing.imageUrl);
