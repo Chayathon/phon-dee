@@ -63,6 +63,7 @@ model Installment {
   id        String   @id @default(cuid())
   debtId    String
   amount    Float
+  principal Float
   dueDate   DateTime @db.Date
   paid      Boolean  @default(false)
   createdAt DateTime @default(now())
