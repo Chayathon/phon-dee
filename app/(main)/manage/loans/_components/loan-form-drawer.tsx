@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { createLoan, updateLoan } from "@/app/actions/loans/loans";
 import { parseLoanForm } from "@/app/actions/loans/loan.parsers";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { FieldError } from "@/components/ui/field-error";
 import { Label } from "@/components/ui/label";
@@ -290,6 +291,7 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                 </div>
 
                 <Button type="submit" size="lg" disabled={pending}>
+                    {pending && <Spinner data-icon="inline-start" />}
                     {pending ? "กำลังบันทึก…" : "บันทึก"}
                 </Button>
             </form>

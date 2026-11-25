@@ -12,6 +12,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
 
@@ -49,7 +50,7 @@ export function LoanDeleteDialog({
     return (
         <AlertDialog
             open={loan !== null}
-            onOpenChange={(open) => !open && onClose()}
+            onOpenChange={(open) => !open && !pending && onClose()}
         >
             <AlertDialogContent>
                 <AlertDialogHeader>
@@ -61,12 +62,15 @@ export function LoanDeleteDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                    <AlertDialogCancel disabled={pending}>
+                        ยกเลิก
+                    </AlertDialogCancel>
                     <AlertDialogAction
                         variant="destructive"
                         disabled={pending}
                         onClick={confirmDelete}
                     >
+                        {pending && <Spinner data-icon="inline-start" />}
                         ลบสินเชื่อ
                     </AlertDialogAction>
                 </AlertDialogFooter>
