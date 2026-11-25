@@ -48,6 +48,7 @@ export async function createLoan(formData: FormData): Promise<ActionResult> {
     try {
         const imageUrl = image ? await uploadLoanImage(image) : null;
         await prisma.loan.create({ data: { ...fields, imageUrl } });
+
         revalidatePath("/manage/loans");
         return { ok: true };
     } catch (e) {
@@ -60,21 +61,27 @@ export async function updateLoan(
     formData: FormData,
 ): Promise<ActionResult> {
     if (!(await isAdmin())) return FORBIDDEN;
+
     const parsed = parseLoanForm(formData);
     if (!parsed.ok) return parsed;
     const { image, ...fields } = parsed.data;
+
     try {
         const existing = await prisma.loan.findUnique({ where: { id } });
         if (!existing) return { ok: false, error: "Loan not found" };
+
         const imageUrl = image
             ? await uploadLoanImage(image)
             : existing.imageUrl;
+
         await prisma.loan.update({
             where: { id },
             data: { ...fields, imageUrl },
         });
+
         if (image && existing.imageUrl)
             await deleteLoanImage(existing.imageUrl);
+
         revalidatePath("/manage/loans");
         return { ok: true };
     } catch (e) {
@@ -89,6 +96,7 @@ export async function setLoanActive(
     if (!(await isAdmin())) return FORBIDDEN;
     try {
         await prisma.loan.update({ where: { id }, data: { active } });
+
         revalidatePath("/manage/loans");
         return { ok: true };
     } catch (e) {
@@ -99,10 +107,23 @@ export async function setLoanActive(
 export async function deleteLoan(id: string): Promise<ActionResult> {
     if (!(await isAdmin())) return FORBIDDEN;
     try {
-        const existing = await prisma.loan.findUnique({ where: { id } });
+        const existing = await prisma.loan.findUnique({
+            where: { id },
+            include: {
+                _count: { select: { debts: true, loanApplications: true } },
+            },
+        });
         if (!existing) return { ok: false, error: "Loan not found" };
+
+        if (existing._count.debts > 0 || existing._count.loanApplications > 0)
+            return {
+                ok: false,
+                error: "ไม่สามารถลบได้ เนื่องจากมีลูกหนี้หรือคำขอกู้ที่ใช้สินเชื่อนี้อยู่ ให้ปิดใช้งานแทน",
+            };
         await prisma.loan.delete({ where: { id } });
+
         if (existing.imageUrl) await deleteLoanImage(existing.imageUrl);
+
         revalidatePath("/manage/loans");
         return { ok: true };
     } catch (e) {

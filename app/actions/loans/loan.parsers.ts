@@ -14,6 +14,7 @@ export function parseLoanForm(formData: FormData): ParseResult {
         installments: formData.getAll("installments"),
         image: formData.get("image"),
     });
+
     return result.success
         ? { ok: true, data: result.data }
         : {
