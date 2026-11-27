@@ -6,6 +6,16 @@ export type UserOption = {
     picture: string | null;
 };
 
+export type DebtorInstallment = {
+    id: string;
+    no: number;
+    amount: number;
+    principal: number;
+    dueDate: string;
+    paid: boolean;
+    overdue: boolean;
+};
+
 export type DebtorItem = {
     id: string;
     userId: string;
@@ -20,6 +30,10 @@ export type DebtorItem = {
     paidCount: number;
     firstDueDate: string;
     nextDueDate: string | null;
+    paidAmount: number;
+    remaining: number;
+    outstandingPrincipal: number;
+    schedule: DebtorInstallment[];
 };
 
 export type DebtorFields = {
@@ -36,3 +50,13 @@ export type ParseResult =
           error: string;
           fieldErrors: Partial<Record<keyof DebtorFields, string[]>>;
       };
+
+export type BulkRemindResult =
+    | {
+          ok: true;
+          sentUsers: number;
+          sentItems: number;
+          sentTotal: number;
+          failed: { name: string; error: string }[];
+      }
+    | { ok: false; error: string };

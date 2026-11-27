@@ -1,74 +1,120 @@
-import { baht, thaiDate, thaiMonth } from "@/lib/format";
+import { thaiDate } from "@/lib/date";
+import { baht } from "@/lib/format";
 import {
     flexMessage,
     type FlexBox,
     type LineFlexMessage,
 } from "@/lib/line-flex";
+import type { DueStatus } from "@/app/actions/debtors/debtor.due";
 
-export type DueStatus = "OVERDUE" | "TODAY" | "MONTHLY" | "UPCOMING";
-
-type ReminderInput = {
-    userName: string | null;
+export type ReminderItem = {
     loanName: string | null;
+    borrowed: number;
     installmentNo: number;
     installmentCount: number;
     amount: number;
     dueIso: string;
-    status: DueStatus;
+    status: DueStatus | null;
 };
 
 const STATUS_STYLE: Record<DueStatus, { color: string; label: string }> = {
     OVERDUE: { color: "#E5484D", label: "เลยกำหนดชำระ" },
     TODAY: { color: "#F5A524", label: "ครบกำหนดวันนี้" },
-    MONTHLY: { color: "#0091FF", label: "แจ้งยอดประจำเดือน" },
-    UPCOMING: { color: "#06C755", label: "ใกล้ครบกำหนด" },
 };
 
-function row(label: string, value: string): FlexBox {
+const DEFAULT_COLOR = "#06C755";
+
+const SEVERITY: DueStatus[] = ["OVERDUE", "TODAY"];
+
+const MAX_ROWS = 12;
+
+function itemRow(item: ReminderItem): FlexBox {
+    const style = item.status ? STATUS_STYLE[item.status] : null;
     return {
         type: "box",
         layout: "horizontal",
+        spacing: "md",
         contents: [
             {
-                type: "text",
-                text: label,
-                size: "sm",
-                color: "#8C8C8C",
-                flex: 2,
-            },
-            {
-                type: "text",
-                text: value,
-                size: "sm",
-                color: "#111111",
+                type: "box",
+                layout: "vertical",
                 flex: 3,
-                align: "end",
-                wrap: true,
+                spacing: "xs",
+                contents: [
+                    // Primary: amount withdrawn on the debt.
+                    {
+                        type: "text",
+                        text: `${baht(item.borrowed)}`,
+                        size: "md",
+                        weight: "bold",
+                        color: "#111111",
+                        wrap: true,
+                    },
+                    // Loan and installment share one weight.
+                    {
+                        type: "text",
+                        text: `${item.loanName ?? "-"} · งวด ${item.installmentNo}/${item.installmentCount}`,
+                        size: "xs",
+                        color: "#555555",
+                        wrap: true,
+                    },
+                    {
+                        type: "text",
+                        text: style
+                            ? `${thaiDate(item.dueIso)} · ${style.label}`
+                            : `${thaiDate(item.dueIso)}`,
+                        size: "xs",
+                        weight: "bold",
+                        color: style?.color ?? "#555555",
+                        wrap: true,
+                    },
+                ],
+            },
+            // Right: what this installment costs.
+            {
+                type: "box",
+                layout: "vertical",
+                flex: 2,
+                justifyContent: "center",
+                contents: [
+                    {
+                        type: "text",
+                        text: baht(item.amount),
+                        size: "lg",
+                        weight: "bold",
+                        color: "#111111",
+                        align: "end",
+                        wrap: true,
+                    },
+                ],
             },
         ],
     };
 }
 
-export function reminderMessage(input: ReminderInput): LineFlexMessage {
-    const { color, label } = STATUS_STYLE[input.status];
-    const dueDate = thaiDate(input.dueIso);
-    const monthly = input.status === "MONTHLY";
-
-    const title = monthly
-        ? `ค่างวดประจำเดือน ${thaiMonth(input.dueIso)}`
-        : "แจ้งเตือนการชำระค่างวด";
+export function summaryMessage(input: {
+    userName: string | null;
+    items: ReminderItem[];
+    total: number;
+}): LineFlexMessage {
+    const { items, total } = input;
+    const worst = SEVERITY.find((s) => items.some((i) => i.status === s));
+    const color = worst ? STATUS_STYLE[worst].color : DEFAULT_COLOR;
+    const overdue = items.filter((i) => i.status === "OVERDUE").length;
+    const dueToday = items.filter((i) => i.status === "TODAY").length;
+    const shown = items.slice(0, MAX_ROWS);
+    const hidden = items.length - shown.length;
 
     const note =
-        input.status === "OVERDUE"
-            ? "กรุณาชำระโดยเร็วที่สุด"
-            : input.status === "TODAY"
-              ? "กรุณาชำระภายในวันนี้"
-              : `กรุณาชำระภายในวันที่ ${dueDate}`;
+        worst === "OVERDUE"
+            ? "มีงวดที่เลยกำหนด กรุณาชำระโดยเร็วที่สุด"
+            : worst === "TODAY"
+              ? "มีงวดที่ครบกำหนด กรุณาชำระภายในวันนี้"
+              : "กรุณาชำระภายในวันที่ครบกำหนด";
 
     return flexMessage(
-        monthly
-            ? `${title} ${baht(input.amount)} ครบกำหนด ${dueDate}`
-            : `แจ้งเตือนค่างวด ${baht(input.amount)} ครบกำหนด ${dueDate}`,
+        // Alt text is used in notifications and when the message cannot be displayed.
+        `สรุปยอดค่างวด ${items.length} รายการ รวม ${baht(total)}`,
         {
             type: "bubble",
             header: {
@@ -77,17 +123,26 @@ export function reminderMessage(input: ReminderInput): LineFlexMessage {
                 backgroundColor: color,
                 paddingAll: "16px",
                 contents: [
+                    // Header: summary of the number of items and their status.
                     {
                         type: "text",
-                        text: title,
+                        text: "สรุปยอดค่างวดที่ต้องชำระ",
                         wrap: true,
                         color: "#FFFFFF",
                         weight: "bold",
                         size: "md",
                     },
+                    // Subheader: number of items and their status.
                     {
                         type: "text",
-                        text: label,
+                        text: [
+                            `${items.length} รายการ`,
+                            overdue > 0 && `เลยกำหนด ${overdue} งวด`,
+                            dueToday > 0 && `ครบกำหนดวันนี้ ${dueToday} งวด`,
+                        ]
+                            .filter(Boolean)
+                            .join(" · "),
+                        wrap: true,
                         color: "#FFFFFF",
                         size: "xs",
                         margin: "sm",
@@ -100,42 +155,77 @@ export function reminderMessage(input: ReminderInput): LineFlexMessage {
                 spacing: "md",
                 paddingAll: "16px",
                 contents: [
+                    // Body: user information and the list of due installments.
                     {
                         type: "text",
-                        text: `คุณ ${input.userName}`,
+                        text: `คุณ ${input.userName ?? ""}`,
                         size: "sm",
                         color: "#555555",
                         wrap: true,
                     },
+                    // Total amount due.
                     {
                         type: "text",
-                        text: "ยอดชำระ",
+                        text: "ยอดชำระรวม",
                         size: "xs",
                         color: "#8C8C8C",
                         margin: "lg",
                     },
                     {
                         type: "text",
-                        text: baht(input.amount),
+                        text: baht(total),
                         size: "xxl",
                         weight: "bold",
                         color: "#111111",
                     },
                     { type: "separator", margin: "lg" },
+
+                    // List of due installments, with a maximum number of rows shown.
                     {
                         type: "box",
                         layout: "vertical",
-                        spacing: "sm",
+                        spacing: "md",
                         margin: "lg",
                         contents: [
-                            row("สินเชื่อ", input.loanName ?? "-"),
-                            row(
-                                "งวดที่",
-                                `${input.installmentNo}/${input.installmentCount}`,
-                            ),
-                            row("ครบกำหนด", dueDate),
+                            ...shown.map(itemRow),
+                            ...(hidden > 0
+                                ? [
+                                      {
+                                          type: "text",
+                                          text: `และอีก ${hidden} รายการ`,
+                                          size: "xs",
+                                          color: "#8C8C8C",
+                                      } as const,
+                                  ]
+                                : []),
                         ],
                     },
+                    { type: "separator", margin: "lg" },
+
+                    // Footer: total amount and a note about the due installments.
+                    {
+                        type: "box",
+                        layout: "horizontal",
+                        margin: "lg",
+                        contents: [
+                            {
+                                type: "text",
+                                text: "รวมทั้งหมด",
+                                size: "lg",
+                                weight: "bold",
+                                color: "#111111",
+                            },
+                            {
+                                type: "text",
+                                text: baht(total),
+                                size: "lg",
+                                weight: "bold",
+                                color,
+                                align: "end",
+                            },
+                        ],
+                    },
+                    // Note: a message about the due installments, based on their status.
                     {
                         type: "text",
                         text: note,
