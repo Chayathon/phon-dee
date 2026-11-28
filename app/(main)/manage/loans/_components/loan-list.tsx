@@ -24,7 +24,7 @@ export function LoanList({ loans }: { loans: LoanItem[] }) {
             {loans.length === 0 ? (
                 <LoanEmpty />
             ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {loans.map((loan) => (
                         <LoanCard
                             key={loan.id}
