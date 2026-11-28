@@ -10,7 +10,7 @@ import {
 export const managementMenu = [
     {
         title: "ลูกหนี้",
-        url: "#",
+        url: "/manage/debtors",
         icon: Users,
     },
     {
@@ -28,7 +28,7 @@ export const managementMenu = [
 export const userMenu = [
     {
         title: "หนี้ของฉัน",
-        url: "#",
+        url: "/home",
         icon: Banknote,
     },
     {
