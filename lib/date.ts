@@ -23,3 +23,4 @@ const formatThai = (iso: string, pattern: string) =>
 export const thaiDate = (iso: string) => formatThai(iso, "D MMM BBBB");
 export const thaiWeekday = (iso: string) => formatThai(iso, "dddd");
 export const thaiMonth = (iso: string) => formatThai(iso, "MMMM BBBB");
+export const thaiShortMonth = (iso: string) => formatThai(iso, "MMM");
