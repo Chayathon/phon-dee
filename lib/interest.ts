@@ -1,5 +1,8 @@
-import type { Frequency, InterestMethod } from "@/app/actions/loans/loan.types";
-import { PERIODS_PER_YEAR } from "@/lib/constants/loan";
+import {
+    type Frequency,
+    type InterestMethod,
+    PERIODS_PER_YEAR,
+} from "@/lib/constants/loan";
 
 export type InstallmentInput = {
     principal: number;

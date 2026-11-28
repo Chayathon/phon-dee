@@ -1,6 +1,5 @@
-import type { Frequency, InterestMethod } from "@/app/actions/loans/loan.types";
-
 export const FREQUENCIES = ["WEEKLY", "BIWEEKLY", "MONTHLY"] as const;
+export type Frequency = (typeof FREQUENCIES)[number];
 
 export const FREQUENCY_LABELS: Record<Frequency, string> = {
     WEEKLY: "รายสัปดาห์",
@@ -15,6 +14,7 @@ export const PERIODS_PER_YEAR: Record<Frequency, number> = {
 };
 
 export const INTEREST_METHODS = ["EFFECTIVE", "FLAT"] as const;
+export type InterestMethod = (typeof INTEREST_METHODS)[number];
 
 export const INTEREST_METHOD_LABELS: Record<InterestMethod, string> = {
     EFFECTIVE: "ลดต้นลดดอก (Effective Rate)",
