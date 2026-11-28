@@ -29,7 +29,8 @@ export type DebtorItem = {
     payment: number;
     paidCount: number;
     firstDueDate: string;
-    nextDueDate: string | null;
+    overdueCount: number;
+    nextDue: { dueDate: string } | null;
     paidAmount: number;
     remaining: number;
     outstandingPrincipal: number;

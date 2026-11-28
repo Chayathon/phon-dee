@@ -83,7 +83,7 @@ export function DebtorPayDialog({
                 </AlertDialogHeader>
 
                 {shown && (
-                    <div className="grid gap-3 rounded-xl bg-muted/60 p-3.5">
+                    <div className="grid gap-3 rounded-2xl border p-4">
                         <div className="grid gap-0.5">
                             <span className="text-xs text-muted-foreground">
                                 ยอดชำระ
@@ -117,7 +117,7 @@ export function DebtorPayDialog({
 
                 <Alert
                     variant="destructive"
-                    className="border-destructive/30 bg-destructive/10"
+                    className="rounded-xl border-destructive/20 bg-destructive/10 px-3.5 py-3"
                 >
                     {overdueDays > 0 ? <CircleAlert /> : <Info />}
                     <AlertTitle>บันทึกแล้วจะยกเลิกภายหลังไม่ได้</AlertTitle>

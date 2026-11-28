@@ -140,7 +140,8 @@ export async function listDebtors(): Promise<DebtorItem[]> {
             payment: rows[0]?.amount ?? 0,
             paidCount: rows.filter((r) => r.paid).length,
             firstDueDate: rows[0] ? toIso(rows[0].dueDate) : "",
-            nextDueDate: nextUnpaid ? toIso(nextUnpaid.dueDate) : null,
+            overdueCount: schedule.filter((s) => s.overdue).length,
+            nextDue: nextUnpaid ? { dueDate: toIso(nextUnpaid.dueDate) } : null,
             paidAmount: sum(
                 schedule.filter((s) => s.paid),
                 "amount",

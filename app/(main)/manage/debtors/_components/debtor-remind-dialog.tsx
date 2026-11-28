@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { CalendarClock, CircleAlert, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { remindDebtors } from "@/app/actions/debtors/debtor";
 import { dueInstallments, sumAmount } from "@/app/actions/debtors/debtor.due";
 import type { DebtorItem } from "@/app/actions/debtors/debtor.types";
@@ -15,8 +15,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { InstallmentStatusBadge } from "@/components/debt/status-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { today } from "@/lib/date";
@@ -157,7 +157,7 @@ export function DebtorRemindDialog({
                         return (
                             <li
                                 key={g.userId}
-                                className="flex items-center gap-3 rounded-xl bg-muted/60 p-2.5"
+                                className="flex items-center gap-3 rounded-2xl border p-3"
                             >
                                 <Avatar>
                                     {g.userPicture && (
@@ -171,31 +171,29 @@ export function DebtorRemindDialog({
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="grid min-w-0 flex-1 gap-1">
-                                    <span className="truncate text-sm font-medium">
+                                    <span className="truncate text-sm font-semibold">
                                         {g.userName ?? "ไม่ระบุชื่อ"}
                                     </span>
                                     <div className="flex min-w-0 gap-1 overflow-hidden">
                                         {g.overdue > 0 && (
-                                            <Badge variant="destructive">
-                                                <CircleAlert data-icon="inline-start" />
+                                            <InstallmentStatusBadge tone="overdue">
                                                 เลยกำหนด {g.overdue}
-                                            </Badge>
+                                            </InstallmentStatusBadge>
                                         )}
                                         {g.dueToday > 0 && (
-                                            <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                                                <CalendarClock data-icon="inline-start" />
+                                            <InstallmentStatusBadge tone="soon">
                                                 วันนี้ {g.dueToday}
-                                            </Badge>
+                                            </InstallmentStatusBadge>
                                         )}
                                         {upcoming > 0 && (
-                                            <Badge variant="secondary">
+                                            <InstallmentStatusBadge tone="wait">
                                                 งวดถัดไป {upcoming}
-                                            </Badge>
+                                            </InstallmentStatusBadge>
                                         )}
                                     </div>
                                 </div>
                                 <div className="grid shrink-0 justify-items-end gap-1 whitespace-nowrap">
-                                    <span className="text-lg leading-5 font-semibold tabular-nums">
+                                    <span className="text-base leading-5 font-semibold tabular-nums">
                                         {baht(g.total)}
                                     </span>
                                     <span className="text-xs leading-5 text-muted-foreground">
