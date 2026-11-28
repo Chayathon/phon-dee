@@ -1,14 +1,10 @@
 import { CalendarCheck2, CalendarClock, CircleAlert } from "lucide-react";
 import type { MyDebtItem } from "@/app/actions/debts/my-debt.types";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { Card } from "@/components/ui/card";
-import {
-    Progress,
-    ProgressLabel,
-    ProgressValue,
-} from "@/components/ui/progress";
+import { Card, CardFooter } from "@/components/ui/card";
+import { BalanceHero } from "@/components/debt/balance-hero";
 import { daysUntil, thaiMonth, thaiShortMonth, today } from "@/lib/date";
-import { baht } from "@/lib/format";
+import { baht, percent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { InstallmentStatusBadge } from "@/components/debt/status-badge";
 
@@ -91,55 +87,30 @@ function DateTile({ iso, days }: { iso: string; days: number }) {
 export function DebtSummary({ userName, debts }: DebtSummaryProps) {
     const remaining = debts.reduce((sum, d) => sum + d.remaining, 0);
     const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
-    const paidPct =
-        paid + remaining > 0
-            ? Math.round((paid / (paid + remaining)) * 100)
-            : 0;
     const active = debts.filter((d) => d.nextDue).length;
     const { rows, month, overdueCount, dueTodayCount } = dueRows(debts);
     const total = rows.reduce((sum, r) => sum + r.amount, 0);
 
     return (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-            <Card
-                className={cn(
-                    "relative justify-between gap-6 overflow-hidden rounded-3xl bg-primary p-6 text-primary-foreground ring-0",
-                    debts.length === 0 && "lg:col-span-full",
-                )}
-            >
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full border-28 border-primary-foreground/5"
-                />
-                <div className="relative grid gap-1">
-                    <p className="text-base opacity-70">
-                        สวัสดี{userName ? `คุณ ${userName}` : ""}
-                    </p>
-                    <p className="mt-4 text-base opacity-70">
-                        ยอดคงค้างทั้งหมด
-                    </p>
-                    <p className="text-4xl font-bold tracking-tight tabular-nums sm:text-5xl">
-                        {baht(remaining)}
-                    </p>
-                    <p className="text-base opacity-70">
-                        {active > 0
-                            ? `กำลังผ่อน ${active} รายการ`
-                            : "ไม่มียอดค้างชำระ"}
-                    </p>
-                </div>
-
-                {paid + remaining > 0 && (
-                    <Progress
-                        value={paidPct}
-                        className="relative gap-2 *:data-[slot=progress-track]:h-2 *:data-[slot=progress-track]:bg-primary-foreground/15 **:data-[slot=progress-indicator]:rounded-full **:data-[slot=progress-indicator]:bg-primary-foreground"
-                    >
-                        <ProgressLabel className="text-sm font-normal tabular-nums opacity-70">
-                            ชำระแล้ว {baht(paid)}
-                        </ProgressLabel>
-                        <ProgressValue className="text-sm text-primary-foreground opacity-70" />
-                    </Progress>
-                )}
-            </Card>
+            <BalanceHero
+                size="lg"
+                className={cn(debts.length === 0 && "lg:col-span-full")}
+                eyebrow={`สวัสดี${userName ? `คุณ ${userName}` : ""}`}
+                label="ยอดคงค้างทั้งหมด"
+                amount={remaining}
+                caption={
+                    active > 0 ? `กำลังผ่อน ${active} รายการ` : "ไม่มียอดค้างชำระ"
+                }
+                progress={
+                    paid + remaining > 0
+                        ? {
+                              value: percent(paid, paid + remaining),
+                              label: `ชำระแล้ว ${baht(paid)}`,
+                          }
+                        : undefined
+                }
+            />
 
             {rows.length > 0 ? (
                 <Card className="gap-0 rounded-3xl p-0">
@@ -158,8 +129,8 @@ export function DebtSummary({ userName, debts }: DebtSummaryProps) {
                         <div className="grid gap-2 px-5 pb-3">
                             {overdueCount > 0 && (
                                 <Alert
-                                    variant="destructive"
-                                    className="rounded-xl border-destructive/20 bg-destructive/10 px-3.5 py-2.5"
+                                    variant="danger"
+                                    className="rounded-xl px-3.5 py-2.5"
                                 >
                                     <CircleAlert />
                                     <AlertTitle>
@@ -168,7 +139,10 @@ export function DebtSummary({ userName, debts }: DebtSummaryProps) {
                                 </Alert>
                             )}
                             {dueTodayCount > 0 && (
-                                <Alert className="rounded-xl border-amber-200 bg-amber-50 px-3.5 py-2.5 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+                                <Alert
+                                    variant="warning"
+                                    className="rounded-xl px-3.5 py-2.5"
+                                >
                                     <CalendarClock />
                                     <AlertTitle>
                                         ครบกำหนดวันนี้ {dueTodayCount} รายการ
@@ -212,14 +186,14 @@ export function DebtSummary({ userName, debts }: DebtSummaryProps) {
                         ))}
                     </ul>
 
-                    <div className="mt-auto flex items-baseline justify-between gap-3 rounded-b-3xl border-t bg-muted/50 px-5 py-4">
+                    <CardFooter className="mt-auto items-baseline justify-between gap-3 rounded-b-3xl px-5 py-4">
                         <span className="text-sm text-muted-foreground">
                             ยอดรวมที่ต้องชำระ
                         </span>
                         <span className="text-2xl font-bold tabular-nums">
                             {baht(total)}
                         </span>
-                    </div>
+                    </CardFooter>
                 </Card>
             ) : debts.length > 0 ? (
                 <Card className="items-center justify-center gap-2 rounded-3xl p-6 text-center">

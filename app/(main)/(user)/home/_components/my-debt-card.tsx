@@ -1,44 +1,25 @@
-import { CalendarDays, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { MyDebtItem } from "@/app/actions/debts/my-debt.types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Progress,
-    ProgressLabel,
-    ProgressValue,
-} from "@/components/ui/progress";
+import { InstallmentProgress } from "@/components/debt/installment-progress";
+import { NextDueLine } from "@/components/debt/next-due-line";
+import { DebtStatusBadge, debtStatus } from "@/components/debt/status-badge";
+import { LoanAvatar } from "@/components/loan-avatar";
+import { CardFooter } from "@/components/ui/card";
 import { FREQUENCY_LABELS } from "@/lib/constants/loan";
-import { thaiDate } from "@/lib/date";
-import { baht } from "@/lib/format";
+import { baht, percent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { MyDebtDetailDrawer } from "./my-debt-detail-drawer";
-import { DebtStatusBadge, debtStatus } from "@/components/debt/status-badge";
 
 export function MyDebtCard({ debt }: { debt: MyDebtItem }) {
     const status = debtStatus(debt);
-    const overdue = status === "overdue";
-    const dueToday = status === "today";
-    const pct = debt.installments
-        ? Math.round((debt.paidCount / debt.installments) * 100)
-        : 0;
 
     return (
         <MyDebtDetailDrawer
             debt={debt}
-            className={cn(overdue && "ring-destructive/40")}
+            className={cn(status === "overdue" && "ring-destructive/40")}
         >
             <div className="flex items-center gap-3">
-                <Avatar className="size-10 rounded-xl after:rounded-xl">
-                    {debt.loanImageUrl && (
-                        <AvatarImage
-                            src={debt.loanImageUrl}
-                            alt=""
-                            className="rounded-xl"
-                        />
-                    )}
-                    <AvatarFallback className="rounded-xl font-semibold">
-                        {debt.loanName.slice(0, 1)}
-                    </AvatarFallback>
-                </Avatar>
+                <LoanAvatar name={debt.loanName} imageUrl={debt.loanImageUrl} />
                 <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">
                         ยอดกู้ {baht(debt.amount)}
@@ -65,41 +46,15 @@ export function MyDebtCard({ debt }: { debt: MyDebtItem }) {
                 </div>
             </div>
 
-            <Progress
-                value={pct}
-                className="gap-2 *:data-[slot=progress-track]:h-1.5 **:data-[slot=progress-indicator]:rounded-full"
-            >
-                <ProgressLabel className="text-xs font-normal text-muted-foreground tabular-nums">
-                    ชำระแล้ว {debt.paidCount}/{debt.installments} งวด
-                </ProgressLabel>
-                <ProgressValue className="text-xs" />
-            </Progress>
+            <InstallmentProgress
+                value={percent(debt.paidCount, debt.installments)}
+                label={`ชำระแล้ว ${debt.paidCount}/${debt.installments} งวด`}
+            />
 
-            <div className="-mx-4 -mb-4 flex items-center justify-between gap-2 border-t px-4 py-3 text-sm">
-                {debt.nextDue ? (
-                    <span
-                        className={cn(
-                            "flex min-w-0 items-center gap-1.5",
-                            overdue
-                                ? "font-medium text-destructive"
-                                : dueToday
-                                  ? "font-medium text-amber-600 dark:text-amber-400"
-                                  : "text-muted-foreground",
-                        )}
-                    >
-                        <CalendarDays className="size-4 shrink-0" />
-                        <span className="truncate">
-                            {overdue ? "ค้างชำระตั้งแต่ " : "งวดถัดไป "}
-                            {dueToday
-                                ? "วันนี้"
-                                : thaiDate(debt.nextDue.dueDate)}
-                        </span>
-                    </span>
-                ) : (
-                    <span className="text-muted-foreground">ผ่อนครบแล้ว</span>
-                )}
+            <CardFooter className="-mx-4 justify-between gap-2 bg-transparent px-4 py-3 text-sm">
+                <NextDueLine status={status} nextDue={debt.nextDue} />
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-            </div>
+            </CardFooter>
         </MyDebtDetailDrawer>
     );
 }

@@ -9,7 +9,7 @@ export default function ManageLayout({ children }: LayoutProps<"/manage">) {
         <SidebarProvider>
             <AppSidebar label="จัดการ" items={managementMenu} />
             <SiteHeader />
-            <main className="min-w-0 flex-1 pt-12 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+            <main className="min-w-0 flex-1 pt-12 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
                 {children}
             </main>
             <BottomAppBar variant="manage" />

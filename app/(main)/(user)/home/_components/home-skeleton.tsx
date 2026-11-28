@@ -7,7 +7,12 @@ export function HomeSkeleton() {
                 <Skeleton className="h-80 rounded-3xl" />
                 <Skeleton className="h-80 rounded-3xl" />
             </div>
-            <Skeleton className="mt-2 h-6 w-36" />
+
+            <div className="mt-2 flex justify-between">
+                <Skeleton className="h-6 w-36" />
+                <Skeleton className="h-6 w-18" />
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                     <Skeleton key={i} className="h-60 rounded-3xl" />

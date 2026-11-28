@@ -1,15 +1,15 @@
-import { UserSidebar } from "@/components/sidebar/user-sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { userMenu } from "@/components/sidebar/nav-menu";
 import { BottomAppBar } from "@/components/sidebar/bottom-app-bar";
 import { SiteHeader } from "@/components/site-header/site-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import type { ReactNode } from "react";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default function AppLayout({ children }: LayoutProps<"/">) {
     return (
         <SidebarProvider>
-            <UserSidebar />
+            <AppSidebar label="เมนูหลัก" items={userMenu} />
             <SiteHeader />
-            <main className="min-w-0 flex-1 pt-14 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+            <main className="min-w-0 flex-1 pt-12 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
                 {children}
             </main>
             <BottomAppBar variant="user" />
