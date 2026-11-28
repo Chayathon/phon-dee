@@ -6,8 +6,9 @@ import {
     Settings,
     Users,
 } from "lucide-react";
+import type { NavItem } from "./nav-group";
 
-export const managementMenu = [
+export const managementMenu: NavItem[] = [
     {
         title: "ลูกหนี้",
         url: "/manage/debtors",
@@ -25,7 +26,7 @@ export const managementMenu = [
     },
 ];
 
-export const userMenu = [
+export const userMenu: NavItem[] = [
     {
         title: "หนี้ของฉัน",
         url: "/home",

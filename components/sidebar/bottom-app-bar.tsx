@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { managementMenu, userMenu } from "./nav-menu";
@@ -8,21 +9,23 @@ interface BottomAppBarProps {
     variant: "user" | "manage";
 }
 
+// Bottom app bar for mobile.
 export function BottomAppBar({ variant }: BottomAppBarProps) {
     const pathname = usePathname();
     const items = variant === "manage" ? managementMenu : userMenu;
 
     return (
         <nav
-            aria-label="Primary"
+            aria-label="เมนูหลัก"
             className="fixed inset-x-0 bottom-0 z-20 border-t bg-background pb-[env(safe-area-inset-bottom)] lg:hidden"
         >
             <ul className="flex h-16 items-stretch">
                 {items.map((item) => {
-                    const isActive = item.url !== "#" && pathname.startsWith(item.url);
+                    const isActive =
+                        item.url !== "#" && pathname.startsWith(item.url);
                     return (
                         <li key={item.title} className="flex-1">
-                            <a
+                            <Link
                                 href={item.url}
                                 aria-current={isActive ? "page" : undefined}
                                 className={cn(
@@ -40,8 +43,10 @@ export function BottomAppBar({ variant }: BottomAppBarProps) {
                                         <item.icon className="size-5" />
                                     </span>
                                 )}
-                                <span className="max-w-full truncate px-1">{item.title}</span>
-                            </a>
+                                <span className="max-w-full truncate px-1">
+                                    {item.title}
+                                </span>
+                            </Link>
                         </li>
                     );
                 })}

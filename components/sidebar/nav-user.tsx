@@ -1,13 +1,17 @@
 "use client";
 
 import type { SessionUser } from "@/app/actions/auth";
-import { getSessionUser } from "@/lib/session";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
+
+const ROLE_LABELS: Record<string, string> = {
+    ADMIN: "ผู้ดูแลระบบ",
+    USER: "ผู้ใช้งาน",
+};
 
 export function NavUser({ user }: { user: SessionUser | null }) {
     const name = user?.name ?? "Guest";
@@ -15,22 +19,18 @@ export function NavUser({ user }: { user: SessionUser | null }) {
     return (
         <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton
-                    size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                    <Avatar className="h-8 w-8 rounded-lg">
-                        {user?.picture && (
-                            <AvatarImage src={user.picture} alt={name} />
-                        )}
-                        <AvatarFallback className="rounded-lg">
-                            {name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
+                <SidebarMenuButton size="lg">
+                    <UserAvatar
+                        name={name}
+                        picture={user?.picture ?? null}
+                        initials={2}
+                        className="size-8 rounded-lg after:rounded-lg"
+                        fallbackClassName="rounded-lg font-normal"
+                    />
                     <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">{name}</span>
                         <span className="truncate text-xs">
-                            {user?.role ?? ""}
+                            {user ? (ROLE_LABELS[user.role] ?? user.role) : ""}
                         </span>
                     </div>
                 </SidebarMenuButton>
