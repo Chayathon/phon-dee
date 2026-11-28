@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { LoanItem } from "@/app/actions/loans/loan.types";
+import { baht } from "@/lib/format";
 
 export type DebtorLoanTerms = Pick<
     LoanItem,
@@ -13,11 +14,11 @@ export function debtorSchema(loan: DebtorLoanTerms) {
             .number("กรุณากรอกจำนวนเงิน")
             .min(
                 loan.minAmount,
-                `จำนวนเงินต้องไม่ต่ำกว่า ฿${loan.minAmount.toLocaleString()}`,
+                `จำนวนเงินต้องไม่ต่ำกว่า ${baht(loan.minAmount)}`,
             )
             .max(
                 loan.maxAmount,
-                `จำนวนเงินต้องไม่เกิน ฿${loan.maxAmount.toLocaleString()}`,
+                `จำนวนเงินต้องไม่เกิน ${baht(loan.maxAmount)}`,
             ),
         installments: z.coerce
             .number("กรุณาเลือกจำนวนงวด")

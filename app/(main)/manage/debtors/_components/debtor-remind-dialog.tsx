@@ -3,7 +3,6 @@
 import { useTransition } from "react";
 import { Send } from "lucide-react";
 import { remindDebtors } from "@/app/actions/debtors/debtor";
-import { dueInstallments, sumAmount } from "@/app/actions/debtors/debtor.due";
 import type { DebtorItem } from "@/app/actions/debtors/debtor.types";
 import {
     AlertDialog,
@@ -16,61 +15,12 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { InstallmentStatusBadge } from "@/components/debt/status-badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { today } from "@/lib/date";
 import { baht } from "@/lib/format";
-
-export type RemindGroup = {
-    userId: string;
-    userName: string | null;
-    userPicture: string | null;
-    items: number;
-    overdue: number;
-    dueToday: number;
-    total: number;
-};
-
-export type RemindSummary = {
-    groups: RemindGroup[];
-    items: number;
-    total: number;
-};
-
-export function summarizeReminders(debtors: DebtorItem[]): RemindSummary {
-    const todayIso = today();
-    const byUser = new Map<string, RemindGroup>();
-
-    for (const d of debtors) {
-        const due = dueInstallments(d.schedule, todayIso);
-
-        if (due.length === 0) continue;
-        const g = byUser.get(d.userId) ?? {
-            userId: d.userId,
-            userName: d.userName,
-            userPicture: d.userPicture,
-            items: 0,
-            overdue: 0,
-            dueToday: 0,
-            total: 0,
-        };
-
-        g.items += due.length;
-        g.overdue += due.filter((s) => s.dueDate < todayIso).length;
-        g.dueToday += due.filter((s) => s.dueDate === todayIso).length;
-        g.total = sumAmount([{ amount: g.total }, ...due]);
-        byUser.set(d.userId, g);
-    }
-
-    const groups = [...byUser.values()].sort((a, b) => b.total - a.total);
-
-    return {
-        groups,
-        items: groups.reduce((n, g) => n + g.items, 0),
-        total: sumAmount(groups.map((g) => ({ amount: g.total }))),
-    };
-}
+import { summarizeReminders } from "../lib/remind-summary";
 
 export function DebtorRemindDialog({
     debtors,
@@ -135,7 +85,7 @@ export function DebtorRemindDialog({
 
     return (
         <AlertDialog
-            open={debtors !== null && debtors.length > 0}
+            open={summary.groups.length > 0}
             onOpenChange={(o) => !o && !pending && onClose()}
         >
             <AlertDialogContent size="lg">
@@ -159,17 +109,10 @@ export function DebtorRemindDialog({
                                 key={g.userId}
                                 className="flex items-center gap-3 rounded-2xl border p-3"
                             >
-                                <Avatar>
-                                    {g.userPicture && (
-                                        <AvatarImage
-                                            src={g.userPicture}
-                                            alt=""
-                                        />
-                                    )}
-                                    <AvatarFallback>
-                                        {(g.userName ?? "?").slice(0, 1)}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <UserAvatar
+                                    name={g.userName}
+                                    picture={g.userPicture}
+                                />
                                 <div className="grid min-w-0 flex-1 gap-1">
                                     <span className="truncate text-sm font-semibold">
                                         {g.userName ?? "ไม่ระบุชื่อ"}
@@ -205,8 +148,9 @@ export function DebtorRemindDialog({
                     })}
                 </ul>
 
+                {summary.groups.length > 1 && <Separator />}
                 {summary.groups.length > 1 && (
-                    <div className="flex items-center justify-between border-t pt-3 text-sm">
+                    <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
                             รวม {summary.groups.length} คน · {summary.items}{" "}
                             รายการ

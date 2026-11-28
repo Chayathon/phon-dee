@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowLeft, CalendarDays, Check } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Search } from "lucide-react";
 import { createDebtor, updateDebtor } from "@/app/actions/debtors/debtor";
 import { parseDebtorForm } from "@/app/actions/debtors/debtor.parsers";
 import type {
@@ -14,7 +14,8 @@ import { FREQUENCY_LABELS, INTEREST_METHOD_LABELS } from "@/lib/constants/loan";
 import { thaiDate, toDate, toIso } from "@/lib/date";
 import { baht } from "@/lib/format";
 import { calculateInstallment } from "@/lib/interest";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,7 +27,7 @@ import {
     DrawerTitle,
 } from "@/components/ui/drawer";
 import { FieldError } from "@/components/ui/field-error";
-import { Input } from "@/components/ui/input";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import {
     InputGroup,
     InputGroupAddon,
@@ -191,16 +192,27 @@ function UserStep({
 
     return (
         <div className="flex min-h-0 flex-col gap-3 p-4">
-            <Input
-                placeholder="ค้นหาชื่อผู้ใช้งาน"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-            />
+            <InputGroup>
+                <InputGroupAddon>
+                    <Search />
+                </InputGroupAddon>
+                <InputGroupInput
+                    type="search"
+                    placeholder="ค้นหาชื่อผู้ใช้งาน"
+                    aria-label="ค้นหาชื่อผู้ใช้งาน"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                />
+            </InputGroup>
             <div className="flex min-h-0 flex-col gap-1 overflow-y-auto">
                 {filtered.length === 0 && (
-                    <p className="py-6 text-center text-sm text-muted-foreground">
-                        ไม่พบผู้ใช้งาน
-                    </p>
+                    <Empty className="p-6">
+                        <EmptyHeader>
+                            <EmptyTitle className="text-sm font-normal text-muted-foreground">
+                                ไม่พบผู้ใช้งาน
+                            </EmptyTitle>
+                        </EmptyHeader>
+                    </Empty>
                 )}
                 {filtered.map((u) => (
                     <button
@@ -209,14 +221,7 @@ function UserStep({
                         onClick={() => onSelect(u)}
                         className="flex items-center gap-3 rounded-xl p-2 text-left hover:bg-muted"
                     >
-                        <Avatar>
-                            {u.picture && (
-                                <AvatarImage src={u.picture} alt="" />
-                            )}
-                            <AvatarFallback>
-                                {(u.name ?? "?").slice(0, 1)}
-                            </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar name={u.name} picture={u.picture} />
                         <span className="truncate">
                             {u.name ?? "ไม่ระบุชื่อ"}
                         </span>
@@ -248,9 +253,13 @@ function LoanStep({
             </Button>
             <div className="flex min-h-0 flex-col gap-2 overflow-y-auto">
                 {loans.length === 0 && (
-                    <p className="py-6 text-center text-sm text-muted-foreground">
-                        ไม่มีสินเชื่อที่เปิดใช้งาน
-                    </p>
+                    <Empty className="p-6">
+                        <EmptyHeader>
+                            <EmptyTitle className="text-sm font-normal text-muted-foreground">
+                                ไม่มีสินเชื่อที่เปิดใช้งาน
+                            </EmptyTitle>
+                        </EmptyHeader>
+                    </Empty>
                 )}
                 {loans.map((l) => (
                     <button
@@ -266,8 +275,18 @@ function LoanStep({
                             {FREQUENCY_LABELS[l.frequency]}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                            {INTEREST_METHOD_LABELS[l.interestMethod]} ·{" "}
-                            {l.installments.join(", ")} งวด
+                            {INTEREST_METHOD_LABELS[l.interestMethod]}
+                        </span>
+                        <span className="flex flex-wrap gap-1">
+                            {l.installments.map((n) => (
+                                <Badge
+                                    key={n}
+                                    variant="outline"
+                                    className="tabular-nums"
+                                >
+                                    {n} งวด
+                                </Badge>
+                            ))}
                         </span>
                         <span className="text-xs text-muted-foreground">
                             เบิกได้คงเหลือ {baht(l.availableAmount)}
@@ -407,8 +426,9 @@ function DetailsStep({
             </div>
 
             <div className="grid gap-2">
-                <Label>จำนวนงวด</Label>
+                <Label id="debtor-installments-label">จำนวนงวด</Label>
                 <ToggleGroup
+                    aria-labelledby="debtor-installments-label"
                     variant="outline"
                     className="w-full flex-wrap"
                     value={installments ? [String(installments)] : []}
@@ -426,7 +446,7 @@ function DetailsStep({
             </div>
 
             <div className="grid gap-2">
-                <Label>วันที่ชำระงวดแรก</Label>
+                <Label id="debtor-first-due-label">วันที่ชำระงวดแรก</Label>
                 <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                     <PopoverTrigger
                         render={
@@ -434,18 +454,20 @@ function DetailsStep({
                                 type="button"
                                 variant="outline"
                                 className="justify-start font-normal"
+                                aria-labelledby="debtor-first-due-label debtor-first-due-value"
                                 aria-invalid={!!errors.firstDueDate}
                             />
                         }
                     >
                         <CalendarDays />
-                        {firstDueDate ? (
-                            thaiDate(firstDueDate)
-                        ) : (
-                            <span className="text-muted-foreground">
-                                เลือกวันที่
-                            </span>
-                        )}
+                        <span
+                            id="debtor-first-due-value"
+                            className={
+                                firstDueDate ? undefined : "text-muted-foreground"
+                            }
+                        >
+                            {firstDueDate ? thaiDate(firstDueDate) : "เลือกวันที่"}
+                        </span>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                         <Calendar

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MessagesSquare, Plus, Send, X } from "lucide-react";
+import { Fab } from "@/components/fab";
 import { Button } from "@/components/ui/button";
 import type {
     DebtorItem,
@@ -9,8 +10,10 @@ import type {
 } from "@/app/actions/debtors/debtor.types";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
 import { baht } from "@/lib/format";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { DebtorRemindDialog, summarizeReminders } from "./debtor-remind-dialog";
+import { summarizeReminders } from "../lib/remind-summary";
+import { DebtorRemindDialog } from "./debtor-remind-dialog";
 import { DebtorCard } from "./debtor-card";
 import { DebtorDeleteDialog } from "./debtor-delete-dialog";
 import { DebtorDetailDrawer } from "./debtor-detail-drawer";
@@ -59,6 +62,18 @@ export function DebtorList({ debtors, users, loans }: DebtorListProps) {
     function exitSelecting() {
         setSelecting(false);
         setSelectedIds(new Set());
+    }
+
+    function remindOne(debtor: DebtorItem) {
+        if (summarizeReminders([debtor]).groups.length > 0) {
+            setReminding([debtor]);
+            return;
+        }
+        toast.add({
+            title: "ยังไม่มีงวดที่ครบกำหนด",
+            description: "ส่งข้อความทวงชำระได้เมื่อมีงวดถึงกำหนดหรือเลยกำหนดแล้ว",
+            type: "info",
+        });
     }
 
     function openDetail(debtor: DebtorItem) {
@@ -125,7 +140,7 @@ export function DebtorList({ debtors, users, loans }: DebtorListProps) {
                             onView={openDetail}
                             onEdit={openDrawer}
                             onDelete={setDeleting}
-                            onRemind={(d) => setReminding([d])}
+                            onRemind={remindOne}
                             selecting={selecting}
                             selected={selectedIds.has(debtor.id)}
                             onToggleSelect={toggleSelect}
@@ -153,14 +168,9 @@ export function DebtorList({ debtors, users, loans }: DebtorListProps) {
                     </Button>
                 </div>
             ) : (
-                <Button
-                    size="icon-lg"
-                    aria-label="Add debtor"
-                    className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 size-14 rounded-full shadow-lg lg:bottom-6 lg:right-6"
-                    onClick={() => openDrawer()}
-                >
+                <Fab label="เพิ่มลูกหนี้" onClick={() => openDrawer()}>
                     <Plus className="size-6" />
-                </Button>
+                </Fab>
             )}
 
             <DebtorFormDrawer

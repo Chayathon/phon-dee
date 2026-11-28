@@ -24,12 +24,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { daysUntil, thaiDate } from "@/lib/date";
 import { baht } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-/** Confirms recording a payment for one installment. */
 export function DebtorPayDialog({
     debtor,
     installment,
@@ -92,7 +93,8 @@ export function DebtorPayDialog({
                                 {baht(shown.amount)}
                             </span>
                         </div>
-                        <dl className="grid grid-cols-2 gap-3 border-t pt-3">
+                        <Separator />
+                        <dl className="grid grid-cols-2 gap-3">
                             <div className="grid gap-0.5">
                                 <dt className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <CalendarDays className="size-3.5 shrink-0" />
@@ -116,8 +118,11 @@ export function DebtorPayDialog({
                 )}
 
                 <Alert
-                    variant="destructive"
-                    className="rounded-xl border-destructive/20 bg-destructive/10 px-3.5 py-3"
+                    variant={overdueDays > 0 ? "danger" : "default"}
+                    className={cn(
+                        "rounded-xl px-3.5 py-3",
+                        overdueDays === 0 && "bg-muted/50",
+                    )}
                 >
                     {overdueDays > 0 ? <CircleAlert /> : <Info />}
                     <AlertTitle>บันทึกแล้วจะยกเลิกภายหลังไม่ได้</AlertTitle>
