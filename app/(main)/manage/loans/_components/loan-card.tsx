@@ -4,7 +4,6 @@ import { useOptimistic, useTransition } from "react";
 import {
     Banknote,
     ListOrdered,
-    type LucideIcon,
     Pencil,
     Percent,
     Trash2,
@@ -12,10 +11,11 @@ import {
 } from "lucide-react";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
 import { setLoanActive } from "@/app/actions/loans/loans";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { type DetailItem, DetailGrid } from "@/components/detail-grid";
+import { IconButton } from "@/components/icon-button";
+import { LoanAvatar } from "@/components/loan-avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import { FREQUENCY_LABELS, INTEREST_METHOD_LABELS } from "@/lib/constants/loan";
@@ -55,7 +55,7 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
         });
     }
 
-    const details: { label: string; value: string; icon: LucideIcon }[] = [
+    const details: DetailItem[] = [
         {
             label: "วงเงินต่อราย",
             value: `${baht(loan.minAmount)} – ${baht(loan.maxAmount)}`,
@@ -71,23 +71,14 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
     return (
         <Card className="gap-4 rounded-3xl p-4">
             <div className="flex items-center gap-3">
-                <Avatar
+                <LoanAvatar
+                    name={loan.name}
+                    imageUrl={loan.imageUrl}
                     className={cn(
-                        "size-12 rounded-xl transition-[filter] after:rounded-xl",
+                        "size-12 transition-[filter]",
                         !active && "grayscale",
                     )}
-                >
-                    {loan.imageUrl && (
-                        <AvatarImage
-                            src={loan.imageUrl}
-                            alt=""
-                            className="rounded-xl object-cover"
-                        />
-                    )}
-                    <AvatarFallback className="rounded-xl font-semibold">
-                        {loan.name.slice(0, 1)}
-                    </AvatarFallback>
-                </Avatar>
+                />
                 <div className="min-w-0 flex-1">
                     <h3 className="truncate font-semibold">{loan.name}</h3>
                     <p className="truncate text-xs text-muted-foreground">
@@ -98,7 +89,7 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
                 <Switch
                     checked={active}
                     onCheckedChange={handleToggle}
-                    aria-label={`${loan.name} active`}
+                    aria-label={`เปิดใช้งาน ${loan.name}`}
                 />
             </div>
 
@@ -125,26 +116,7 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
                     )}
                 </div>
 
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-2xl border p-3">
-                    {details.map((d) => (
-                        <div
-                            key={d.label}
-                            className="flex min-w-0 items-center gap-2.5"
-                        >
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                <d.icon className="size-4" />
-                            </span>
-                            <div className="grid min-w-0 gap-0.5">
-                                <dt className="text-xs text-muted-foreground">
-                                    {d.label}
-                                </dt>
-                                <dd className="truncate text-sm font-semibold tabular-nums">
-                                    {d.value}
-                                </dd>
-                            </div>
-                        </div>
-                    ))}
-                </dl>
+                <DetailGrid items={details} className="gap-y-3 p-3" />
 
                 <div className="grid gap-1.5">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -165,7 +137,7 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
                 </div>
             </div>
 
-            <div className="-mx-4 -mb-4 flex min-h-13 items-center justify-between gap-2 border-t px-4 py-2 text-sm">
+            <CardFooter className="-mx-4 min-h-13 justify-between gap-2 bg-transparent px-4 py-2 text-sm">
                 <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
                     <Users className="size-4 shrink-0" />
                     <span className="truncate">
@@ -175,24 +147,22 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
                     </span>
                 </span>
                 <div className="flex shrink-0 items-center gap-0.5">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Edit ${loan.name}`}
+                    <IconButton
+                        label="แก้ไข"
+                        aria-label={`แก้ไข ${loan.name}`}
                         onClick={() => onEdit(loan)}
                     >
                         <Pencil />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Delete ${loan.name}`}
+                    </IconButton>
+                    <IconButton
+                        label="ลบ"
+                        aria-label={`ลบ ${loan.name}`}
                         onClick={() => onDelete(loan)}
                     >
                         <Trash2 className="text-destructive" />
-                    </Button>
+                    </IconButton>
                 </div>
-            </div>
+            </CardFooter>
         </Card>
     );
 }

@@ -1,21 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
-import { deleteLoan } from "@/app/actions/loans/loans";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/components/ui/toast";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
-import { Trash2 } from "lucide-react";
+import { deleteLoan } from "@/app/actions/loans/loans";
+import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
 
 export function LoanDeleteDialog({
     loan,
@@ -24,62 +11,21 @@ export function LoanDeleteDialog({
     loan: LoanItem | null;
     onClose: () => void;
 }) {
-    const [pending, startTransition] = useTransition();
-
-    function confirmDelete() {
-        if (!loan) return;
-        const target = loan;
-        startTransition(async () => {
-            const res = await deleteLoan(target.id);
-            if (res.ok) {
-                toast.add({
-                    title: "ลบสินเชื่อสำเร็จ",
-                    description: target.name,
-                    type: "success",
-                });
-            } else {
-                toast.add({
-                    title: "ไม่สามารถลบสินเชื่อได้",
-                    description: res.error,
-                    type: "error",
-                });
-            }
-            onClose();
-        });
-    }
-
     return (
-        <AlertDialog
-            open={loan !== null}
-            onOpenChange={(open) => !open && !pending && onClose()}
-        >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>
-                        ยืนยันที่จะลบสินเชื่อ <strong>{loan?.name}</strong>?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        การลบสินเชื่อนี้จะไม่สามารถกู้คืนได้
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel disabled={pending}>
-                        ยกเลิก
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        variant="destructive"
-                        disabled={pending}
-                        onClick={confirmDelete}
-                    >
-                        {pending ? (
-                            <Spinner data-icon="inline-start" />
-                        ) : (
-                            <Trash2 data-icon="inline-start" />
-                        )}
-                        ลบสินเชื่อ
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDeleteDialog
+            target={loan}
+            onClose={onClose}
+            onConfirm={(l) => deleteLoan(l.id)}
+            title={(l) => (
+                <>
+                    ยืนยันที่จะลบสินเชื่อ <strong>{l.name}</strong>?
+                </>
+            )}
+            description="การลบสินเชื่อนี้จะไม่สามารถกู้คืนได้"
+            confirmLabel="ลบสินเชื่อ"
+            successTitle="ลบสินเชื่อสำเร็จ"
+            errorTitle="ไม่สามารถลบสินเชื่อได้"
+            describe={(l) => l.name}
+        />
     );
 }

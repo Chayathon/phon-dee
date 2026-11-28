@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { createLoan, updateLoan } from "@/app/actions/loans/loans";
 import { parseLoanForm } from "@/app/actions/loans/loan.parsers";
 import { Button } from "@/components/ui/button";
@@ -79,6 +79,12 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
     >({});
     const [pending, startTransition] = useTransition();
 
+    // Free the blob URL of a picked file when it's replaced or the form unmounts.
+    useEffect(() => {
+        if (!preview?.startsWith("blob:")) return;
+        return () => URL.revokeObjectURL(preview);
+    }, [preview]);
+
     const installmentOptions = [
         ...new Set([...INSTALLMENT_PRESETS, ...(loan?.installments ?? [])]),
     ].sort((a, b) => a - b);
@@ -96,7 +102,6 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
             return;
         }
         setErrors({});
-        setPreview(null);
 
         startTransition(async () => {
             const res = loan
@@ -155,7 +160,7 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={preview}
-                            alt="Loan preview"
+                            alt="ตัวอย่างรูปสินเชื่อ"
                             className="mx-auto lg:ml-2 my-2 aspect-square size-52 rounded-2xl object-cover drop-shadow-xl"
                         />
                     )}
@@ -171,49 +176,64 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                     />
                 </div>
 
-                <Label>วงเงินที่กู้ได้</Label>
-                <div className="grid grid-cols-2 items-start gap-3">
-                    <div className="grid gap-2">
-                        <Label htmlFor="loan-min">ขั้นต่ำ</Label>
-                        <InputGroup>
-                            <InputGroupInput
-                                id="loan-min"
-                                name="minAmount"
-                                placeholder="1000"
-                                type="number"
-                                inputMode="decimal"
-                                min={1}
-                                step="any"
-                                defaultValue={loan?.minAmount}
-                                aria-invalid={!!errors.minAmount}
-                            />
-                            <InputGroupAddon>฿</InputGroupAddon>
-                        </InputGroup>
-                        <FieldError errors={errors.minAmount} />
+                <fieldset className="grid gap-2">
+                    <legend className="mb-2 text-sm leading-none font-medium">
+                        วงเงินที่กู้ได้
+                    </legend>
+                    <div className="grid grid-cols-2 items-start gap-3">
+                        <div className="grid gap-2">
+                            <Label
+                                htmlFor="loan-min"
+                                className="text-muted-foreground"
+                            >
+                                ขั้นต่ำ
+                            </Label>
+                            <InputGroup>
+                                <InputGroupInput
+                                    id="loan-min"
+                                    name="minAmount"
+                                    placeholder="1000"
+                                    type="number"
+                                    inputMode="decimal"
+                                    min={1}
+                                    step="any"
+                                    defaultValue={loan?.minAmount}
+                                    aria-invalid={!!errors.minAmount}
+                                />
+                                <InputGroupAddon>฿</InputGroupAddon>
+                            </InputGroup>
+                            <FieldError errors={errors.minAmount} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label
+                                htmlFor="loan-max"
+                                className="text-muted-foreground"
+                            >
+                                สูงสุด
+                            </Label>
+                            <InputGroup>
+                                <InputGroupInput
+                                    id="loan-max"
+                                    name="maxAmount"
+                                    placeholder="40000"
+                                    type="number"
+                                    inputMode="decimal"
+                                    min={1}
+                                    step="any"
+                                    defaultValue={loan?.maxAmount}
+                                    aria-invalid={!!errors.maxAmount}
+                                />
+                                <InputGroupAddon>฿</InputGroupAddon>
+                            </InputGroup>
+                            <FieldError errors={errors.maxAmount} />
+                        </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="loan-max">สูงสุด</Label>
-                        <InputGroup>
-                            <InputGroupInput
-                                id="loan-max"
-                                name="maxAmount"
-                                placeholder="40000"
-                                type="number"
-                                inputMode="decimal"
-                                min={1}
-                                step="any"
-                                defaultValue={loan?.maxAmount}
-                                aria-invalid={!!errors.maxAmount}
-                            />
-                            <InputGroupAddon>฿</InputGroupAddon>
-                        </InputGroup>
-                        <FieldError errors={errors.maxAmount} />
-                    </div>
-                </div>
+                </fieldset>
 
                 <div className="grid gap-2">
-                    <Label>รอบชำระ</Label>
+                    <Label id="loan-frequency-label">รอบชำระ</Label>
                     <ToggleGroup
+                        aria-labelledby="loan-frequency-label"
                         variant="outline"
                         value={[frequency]}
                         onValueChange={(v) =>
@@ -226,11 +246,15 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                             </ToggleGroupItem>
                         ))}
                     </ToggleGroup>
+                    <FieldError errors={errors.frequency} />
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>วิธีคิดดอกเบี้ย</Label>
+                    <Label id="loan-interest-method-label">
+                        วิธีคิดดอกเบี้ย
+                    </Label>
                     <ToggleGroup
+                        aria-labelledby="loan-interest-method-label"
                         variant="outline"
                         value={[interestMethod]}
                         onValueChange={(v) =>
@@ -267,8 +291,11 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>จำนวนงวดที่ให้บริการ</Label>
+                    <Label id="loan-installments-label">
+                        จำนวนงวดที่ให้บริการ
+                    </Label>
                     <ToggleGroup
+                        aria-labelledby="loan-installments-label"
                         multiple
                         variant="outline"
                         className="w-full flex-wrap"
@@ -281,7 +308,7 @@ function LoanForm({ loan, onDone }: { loan?: LoanItem; onDone: () => void }) {
                             <ToggleGroupItem
                                 key={n}
                                 value={String(n)}
-                                aria-label={`${n} installments`}
+                                aria-label={`${n} งวด`}
                             >
                                 {n}
                             </ToggleGroupItem>

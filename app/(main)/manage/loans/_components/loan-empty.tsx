@@ -9,19 +9,16 @@ import {
 
 export function LoanEmpty() {
     return (
-        <div className="py-12">
-            <Empty>
-                <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                        <Landmark className="size-12" />
-                    </EmptyMedia>
-                    <EmptyTitle>ไม่มีตัวเลือกสินเชื่อ</EmptyTitle>
-                    <EmptyDescription>
-                        เพิ่มตัวเลือกสินเชื่อใหม่เพื่อให้ลูกหนี้สามารถขอสินเชื่อได้
-                    </EmptyDescription>
-                    <EmptyDescription></EmptyDescription>
-                </EmptyHeader>
-            </Empty>
-        </div>
+        <Empty className="py-18">
+            <EmptyHeader>
+                <EmptyMedia variant="icon">
+                    <Landmark className="size-12" />
+                </EmptyMedia>
+                <EmptyTitle>ไม่มีตัวเลือกสินเชื่อ</EmptyTitle>
+                <EmptyDescription>
+                    เพิ่มตัวเลือกสินเชื่อใหม่เพื่อให้ลูกหนี้สามารถขอสินเชื่อได้
+                </EmptyDescription>
+            </EmptyHeader>
+        </Empty>
     );
 }

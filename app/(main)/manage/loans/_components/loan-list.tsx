@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Fab } from "@/components/fab";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
 import { LoanCard } from "./loan-card";
 import { LoanDeleteDialog } from "./loan-delete-dialog";
@@ -36,14 +36,9 @@ export function LoanList({ loans }: { loans: LoanItem[] }) {
                 </div>
             )}
 
-            <Button
-                size="icon-lg"
-                aria-label="Add loan"
-                className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 size-14 rounded-full shadow-lg lg:bottom-6 lg:right-6"
-                onClick={() => openDrawer()}
-            >
+            <Fab label="เพิ่มสินเชื่อ" onClick={() => openDrawer()}>
                 <Plus className="size-6" />
-            </Button>
+            </Fab>
 
             <LoanFormDrawer
                 open={drawerOpen}
