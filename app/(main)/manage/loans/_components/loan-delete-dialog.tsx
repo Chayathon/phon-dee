@@ -15,6 +15,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
+import { Trash2 } from "lucide-react";
 
 export function LoanDeleteDialog({
     loan,
@@ -70,7 +71,11 @@ export function LoanDeleteDialog({
                         disabled={pending}
                         onClick={confirmDelete}
                     >
-                        {pending && <Spinner data-icon="inline-start" />}
+                        {pending ? (
+                            <Spinner data-icon="inline-start" />
+                        ) : (
+                            <Trash2 data-icon="inline-start" />
+                        )}
                         ลบสินเชื่อ
                     </AlertDialogAction>
                 </AlertDialogFooter>

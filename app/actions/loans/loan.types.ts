@@ -19,6 +19,7 @@ export type LoanItem = {
     interestRate: number;
     installments: number[];
     active: boolean;
+    openDebtCount: number;
 };
 
 export type LoanFields = z.output<typeof loanSchema>;

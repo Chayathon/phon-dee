@@ -1,17 +1,26 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import Image from "next/image";
+import {
+    Banknote,
+    ListOrdered,
+    type LucideIcon,
+    Pencil,
+    Percent,
+    Trash2,
+    Users,
+} from "lucide-react";
 import type { LoanItem } from "@/app/actions/loans/loan.types";
-import { FREQUENCY_LABELS, INTEREST_METHOD_LABELS } from "@/lib/constants/loan";
-import { baht } from "@/lib/format";
 import { setLoanActive } from "@/app/actions/loans/loans";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
-import { ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { FREQUENCY_LABELS, INTEREST_METHOD_LABELS } from "@/lib/constants/loan";
+import { baht } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 type LoanCardProps = {
     loan: LoanItem;
@@ -46,64 +55,126 @@ export function LoanCard({ loan, onEdit, onDelete }: LoanCardProps) {
         });
     }
 
+    const details: { label: string; value: string; icon: LucideIcon }[] = [
+        {
+            label: "วงเงินต่อราย",
+            value: `${baht(loan.minAmount)} – ${baht(loan.maxAmount)}`,
+            icon: Banknote,
+        },
+        {
+            label: "ดอกเบี้ย",
+            value: `${loan.interestRate}% ต่อปี`,
+            icon: Percent,
+        },
+    ];
+
     return (
-        <Card
-            className={`gap-0 overflow-hidden rounded-3xl p-0 transition-opacity ${
-                active ? "" : "opacity-60"
-            }`}
-        >
-            <div className="relative aspect-square w-full bg-muted">
-                {loan.imageUrl ? (
-                    <Image
-                        src={loan.imageUrl}
-                        alt={loan.name}
-                        fill
-                        sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover"
-                    />
-                ) : (
-                    <div className="flex size-full items-center justify-center text-muted-foreground">
-                        <ImageIcon className="size-10" />
-                    </div>
-                )}
+        <Card className="gap-4 rounded-3xl p-4">
+            <div className="flex items-center gap-3">
+                <Avatar
+                    className={cn(
+                        "size-12 rounded-xl transition-[filter] after:rounded-xl",
+                        !active && "grayscale",
+                    )}
+                >
+                    {loan.imageUrl && (
+                        <AvatarImage
+                            src={loan.imageUrl}
+                            alt=""
+                            className="rounded-xl object-cover"
+                        />
+                    )}
+                    <AvatarFallback className="rounded-xl font-semibold">
+                        {loan.name.slice(0, 1)}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-semibold">{loan.name}</h3>
+                    <p className="truncate text-xs text-muted-foreground">
+                        {FREQUENCY_LABELS[loan.frequency]} ·{" "}
+                        {INTEREST_METHOD_LABELS[loan.interestMethod]}
+                    </p>
+                </div>
+                <Switch
+                    checked={active}
+                    onCheckedChange={handleToggle}
+                    aria-label={`${loan.name} active`}
+                />
             </div>
-            <div className="flex flex-col gap-3 p-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                        <h3 className="truncate text-base font-semibold">
-                            {loan.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                            {baht(loan.minAmount)} – {baht(loan.maxAmount)}
+
+            {/* Body fades when the loan is closed; the header switch stays fully visible. */}
+            <div
+                className={cn(
+                    "grid gap-4 transition-opacity",
+                    !active && "opacity-60",
+                )}
+            >
+                <div className="flex items-end justify-between gap-3">
+                    <div>
+                        <p className="text-xs text-muted-foreground">
+                            วงเงินคงเหลือ
                         </p>
-                        <p className="my-4 text-lg font-semibold text-muted-foreground">
-                            คงเหลือ{" "}
-                            <span className="text-xl font-bold text-foreground">
-                                {baht(loan.availableAmount)}
-                            </span>
+                        <p className="text-2xl font-bold tracking-tight tabular-nums">
+                            {baht(loan.availableAmount)}
                         </p>
                     </div>
-                    <Switch
-                        checked={active}
-                        onCheckedChange={handleToggle}
-                        aria-label={`${loan.name} active`}
-                    />
+                    {active ? (
+                        <Badge>เปิดรับ</Badge>
+                    ) : (
+                        <Badge variant="secondary">ปิดใช้งาน</Badge>
+                    )}
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                    <Badge>{FREQUENCY_LABELS[loan.frequency]}</Badge>
-                    <Badge variant="secondary">
-                        {INTEREST_METHOD_LABELS[loan.interestMethod]} ·{" "}
-                        {loan.interestRate}% ต่อปี
-                    </Badge>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                    {loan.installments.map((n) => (
-                        <Badge key={n} variant="outline">
-                            {n} งวด
-                        </Badge>
+
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-2xl border p-3">
+                    {details.map((d) => (
+                        <div
+                            key={d.label}
+                            className="flex min-w-0 items-center gap-2.5"
+                        >
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                <d.icon className="size-4" />
+                            </span>
+                            <div className="grid min-w-0 gap-0.5">
+                                <dt className="text-xs text-muted-foreground">
+                                    {d.label}
+                                </dt>
+                                <dd className="truncate text-sm font-semibold tabular-nums">
+                                    {d.value}
+                                </dd>
+                            </div>
+                        </div>
                     ))}
+                </dl>
+
+                <div className="grid gap-1.5">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <ListOrdered className="size-3.5" />
+                        จำนวนงวดที่เลือกได้
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                        {loan.installments.map((n) => (
+                            <Badge
+                                variant="outline"
+                                key={n}
+                                className="tabular-nums"
+                            >
+                                {n} งวด
+                            </Badge>
+                        ))}
+                    </div>
                 </div>
-                <div className="flex justify-end gap-1">
+            </div>
+
+            <div className="-mx-4 -mb-4 flex min-h-13 items-center justify-between gap-2 border-t px-4 py-2 text-sm">
+                <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                    <Users className="size-4 shrink-0" />
+                    <span className="truncate">
+                        {loan.openDebtCount > 0
+                            ? `กำลังผ่อน ${loan.openDebtCount.toLocaleString("th-TH")} ราย`
+                            : "ยังไม่มีผู้กู้"}
+                    </span>
+                </span>
+                <div className="flex shrink-0 items-center gap-0.5">
                     <Button
                         variant="ghost"
                         size="icon"

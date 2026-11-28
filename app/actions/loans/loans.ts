@@ -24,6 +24,15 @@ export async function listLoans(): Promise<LoanItem[]> {
 
     const loans = await prisma.loan.findMany({
         orderBy: { createdAt: "desc" },
+        include: {
+            _count: {
+                select: {
+                    debts: {
+                        where: { installmentItems: { some: { paid: false } } },
+                    },
+                },
+            },
+        },
     });
 
     return loans.map((l) => ({
@@ -38,6 +47,7 @@ export async function listLoans(): Promise<LoanItem[]> {
         interestRate: l.interestRate,
         installments: l.installments,
         active: l.active,
+        openDebtCount: l._count.debts,
     }));
 }
 
